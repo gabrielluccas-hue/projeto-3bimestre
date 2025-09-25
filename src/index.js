@@ -1,3 +1,4 @@
+// Importar as bibliotecas necessárias
 import express from "express";
 import dotenv from "dotenv";
 import prisma from "./db.js";
@@ -32,6 +33,35 @@ app.post('/users', async (req, res) => {
       data: { email, name }
     });
     res.status(201).json(user);
+  } catch (e) { 
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.put('/users/:id', async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    
+    const user = await prisma.user.update({
+      where: { id: Number(req.params.id) },
+      data: updateData,
+      include: { store: true }
+    });
+    res.json(user);
+  } catch (e) { 
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.delete('/users/:id', async (req, res) => {
+  try {
+    await prisma.user.delete({
+      where: { id: Number(req.params.id) }
+    });
+    res.status(204).send();
   } catch (e) { 
     res.status(400).json({ error: e.message });
   }
